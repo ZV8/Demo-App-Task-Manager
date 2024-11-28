@@ -25,65 +25,6 @@ docker-compose up -d
 
 Приложение будет доступно по адресу http://localhost
 
-<details>
-<summary>### Локальная разработка (альтернативный способ)</summary>
-
-Если вы хотите запустить приложение локально без Docker, выполните следующие шаги:
-
-#### Backend (Python/FastAPI)
-
-1. Создайте и активируйте виртуальное окружение Python:
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # для Linux/macOS
-# или
-.\venv\Scripts\activate  # для Windows
-```
-
-2. Установите зависимости:
-```bash
-pip install -r requirements.txt
-```
-
-3. Настройте переменные окружения:
-```bash
-cp .env.example .env
-```
-Отредактируйте `.env` файл, установив свои значения.
-
-4. Запустите PostgreSQL (локально или через Docker):
-```bash
-docker-compose up -d postgres
-```
-
-5. Запустите сервер разработки:
-```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-#### Frontend (React/TypeScript)
-
-1. Установите зависимости:
-```bash
-cd frontend
-npm install
-```
-
-2. Создайте файл с переменными окружения:
-```bash
-cp .env.example .env
-```
-
-3. Запустите сервер разработки:
-```bash
-npm start
-```
-
-Frontend будет доступен по адресу http://localhost:3000, а API по адресу http://localhost:8000.
-
-</details>
-
 ## Технологии
 
 ### Frontend
