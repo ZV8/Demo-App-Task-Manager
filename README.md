@@ -178,35 +178,34 @@ task-manager/
 
 ## Установка и запуск
 
-### Требования
-- Docker
-- Docker Compose
+### С использованием Docker (рекомендуется)
 
-### Запуск приложения
-
-1. Клонируйте репозиторий:
+1. Убедитесь, что у вас установлены Docker и Docker Compose
+2. Клонируйте репозиторий:
 ```bash
-git clone <repository-url>
+git clone https://github.com/ZV8/Demo-App-Task-Manager.git
 cd task-manager
 ```
-
-2. Создайте файл .env в корневой директории:
-```env
-POSTGRES_DB=taskmanager
-POSTGRES_USER=taskuser
-POSTGRES_PASSWORD=taskpass
-SECRET_KEY=your-secret-key
+3. Скопируйте файл с переменными окружения и настройте его:
+```bash
+cp .env.example .env
 ```
+Отредактируйте `.env` файл, установив безопасные значения для паролей и ключей.
 
-3. Запустите приложение:
+4. Запустите приложение:
 ```bash
 docker-compose up -d
 ```
 
-4. Откройте приложение:
+### Локальная разработка
+
+Если вы хотите запустить приложение локально без Docker:
+
+1. Используйте тот же `.env` файл, что и для Docker:
+```bash
+cp .env.example .env
 ```
-http://localhost
-```
+Установите свои значения для переменных окружения.
 
 ## Разработка
 
