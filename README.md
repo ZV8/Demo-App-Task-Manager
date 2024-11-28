@@ -184,7 +184,7 @@ task-manager/
 2. Клонируйте репозиторий:
 ```bash
 git clone https://github.com/ZV8/Demo-App-Task-Manager.git
-cd task-manager
+cd Demo-App-Task-Manager
 ```
 3. Скопируйте файл с переменными окружения и настройте его:
 ```bash

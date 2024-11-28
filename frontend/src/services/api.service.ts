@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { API_URL } from '../config';
 import { authService } from './auth.service';
-import { Task } from '../types';
+import { Task, CreateTaskRequest } from '../types';
 
 interface ErrorResponseData {
     retry_after?: number;
@@ -13,11 +13,12 @@ interface RetryableRequest extends InternalAxiosRequestConfig {
 }
 
 class ApiService {
+    private static instance: ApiService;
     private api: AxiosInstance;
     private isRefreshing = false;
     private refreshSubscribers: ((token: string) => void)[] = [];
 
-    constructor() {
+    private constructor() {
         this.api = axios.create({
             baseURL: API_URL,
             headers: {
@@ -26,6 +27,13 @@ class ApiService {
         });
 
         this.setupInterceptors();
+    }
+
+    public static getInstance(): ApiService {
+        if (!ApiService.instance) {
+            ApiService.instance = new ApiService();
+        }
+        return ApiService.instance;
     }
 
     private setupInterceptors(): void {
@@ -57,7 +65,9 @@ class ApiService {
                                     resolve(token);
                                 });
                             });
-                            originalRequest.headers.Authorization = `Bearer ${token}`;
+                            if (originalRequest.headers) {
+                                originalRequest.headers.Authorization = `Bearer ${token}`;
+                            }
                             return this.api(originalRequest);
                         } catch (err) {
                             return Promise.reject(err);
@@ -71,11 +81,17 @@ class ApiService {
                         const refreshed = await authService.refreshToken();
                         if (refreshed) {
                             const newToken = authService.getToken();
-                            this.refreshSubscribers.forEach((callback) => callback(newToken!));
-                            this.refreshSubscribers = [];
-                            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-                            return this.api(originalRequest);
+                            if (newToken && originalRequest.headers) {
+                                this.refreshSubscribers.forEach((callback) => callback(newToken));
+                                this.refreshSubscribers = [];
+                                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                                return this.api(originalRequest);
+                            }
                         }
+                        // Если не удалось обновить токен или получить новый
+                        authService.removeTokens();
+                        window.location.href = '/login';
+                        return Promise.reject(new Error('Failed to refresh token'));
                     } catch (error) {
                         authService.removeTokens();
                         window.location.href = '/login';
@@ -83,6 +99,13 @@ class ApiService {
                     } finally {
                         this.isRefreshing = false;
                     }
+                }
+
+                // Обработка ошибок rate limiting
+                if (error.response?.status === 429) {
+                    const retryAfter = error.response.data.retry_after || 1;
+                    await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+                    return this.api(error.config!);
                 }
 
                 return Promise.reject(error);
@@ -100,13 +123,13 @@ class ApiService {
         return response.data;
     }
 
-    public async createTask(title: string, description?: string, completed: boolean = false): Promise<Task> {
-        const response = await this.api.post<Task>('/tasks', { title, description, completed });
+    public async createTask(task: CreateTaskRequest): Promise<Task> {
+        const response = await this.api.post<Task>('/tasks', task);
         return response.data;
     }
 
-    public async updateTask(id: number, data: Partial<Task>): Promise<Task> {
-        const response = await this.api.put<Task>(`/tasks/${id}`, data);
+    public async updateTask(id: number, task: Partial<Task>): Promise<Task> {
+        const response = await this.api.put<Task>(`/tasks/${id}`, task);
         return response.data;
     }
 
@@ -115,5 +138,5 @@ class ApiService {
     }
 }
 
-export const apiService = new ApiService();
+export const apiService = ApiService.getInstance();
 export const api = apiService.getApi();

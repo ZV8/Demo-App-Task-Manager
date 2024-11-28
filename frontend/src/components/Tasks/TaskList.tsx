@@ -128,7 +128,7 @@ const TaskList: React.FC = () => {
         const updatedTask = await apiService.updateTask(editingTask.id, data);
         setTasks(tasks.map(task => task.id === editingTask.id ? updatedTask : task));
       } else {
-        const newTask = await apiService.createTask(data.title, data.description);
+        const newTask = await apiService.createTask({ title: data.title, description: data.description, completed: false });
         setTasks([newTask, ...tasks]);
       }
       handleDialogClose();

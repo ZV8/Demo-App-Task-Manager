@@ -9,19 +9,18 @@ const REFRESH_TOKEN_KEY = 'refresh_token';
  * @class AuthService
  */
 class AuthService {
-    /**
-     * Токен для аутентификации пользователя
-     * @private
-     * @type {string | null}
-     */
-    private token: string | null = null;
+    private static instance: AuthService;
 
     /**
-     * Refresh токен для обновления access токена
-     * @private
-     * @type {string | null}
+     * Получает экземпляр сервиса аутентификации
+     * @returns {AuthService} Экземпляр сервиса аутентификации
      */
-    private refreshToken: string | null = null;
+    public static getInstance(): AuthService {
+        if (!AuthService.instance) {
+            AuthService.instance = new AuthService();
+        }
+        return AuthService.instance;
+    }
 
     /**
      * Получает токен для аутентификации пользователя
@@ -104,6 +103,7 @@ class AuthService {
      */
     async login(username: string, password: string): Promise<boolean> {
         try {
+            // Создаем FormData для отправки данных
             const formData = new URLSearchParams();
             formData.append('username', username);
             formData.append('password', password);
@@ -118,7 +118,6 @@ class AuthService {
             this.setTokens(access_token, refresh_token);
             return true;
         } catch (error) {
-            console.error('Login error:', error);
             return false;
         }
     }
@@ -146,4 +145,4 @@ class AuthService {
     }
 }
 
-export const authService = new AuthService();
+export const authService = AuthService.getInstance();

@@ -34,3 +34,9 @@ export interface AuthResponse {
     refresh_token: string;
     token_type: string;
 }
+
+export interface CreateTaskRequest {
+    title: string;
+    description?: string;
+    completed: boolean;
+}
